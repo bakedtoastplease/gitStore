@@ -159,6 +159,112 @@ h1{font-size:28px;margin-bottom:18px;letter-spacing:0.4px}
 .btn-download{background:linear-gradient(180deg,#1db954,#139746);color:#fff}
 .btn-info{background:rgba(255,255,255,0.04);color:#dfeef0}
 
+.card:before{content:'';position:absolute;left:-40%;top:-30%;width:200%;height:160%;background:linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.02) 100%);transform:translateX(-60%) rotate(8deg);opacity:0;transition:opacity .6s}
+.card:hover:before{opacity:1}
+
+#terminal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;width:420px;max-width:92vw;background:rgba(7,12,18,0.9);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.06);display:none;flex-direction:column;gap:8px}
+#term-output{background:#06070a;border-radius:8px;padding:10px;min-height:80px;color:#8fffa1;font-family:monospace;font-size:13px;overflow:auto}
+#term-input{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#e6ffe6;padding:10px;border-radius:8px;font-family:monospace}
+#term-actions{display:flex;gap:8px}
+.btn-cancel{background:#2b2b2b;color:#fff}
+
+@media (max-width:520px){h1{font-size:20px}.grid{gap:12px}}
+
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.logo .mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#6EE7B7,#3B82F6);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+
+.matrix-glow{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
+
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+  <div class="matrix-glow" aria-hidden></div>  <div class="wrap">
+    <div class="logo">
+      <div class="mark">gS</div>
+      <div>
+        <h1>gitStore</h1>
+        <div class="subtitle">Магазин приложений — клонируй, подтверждай и ставь</div>
+      </div>
+    </div><div class="grid" id="apps"></div>
+
+  </div>  <div id="terminal">
+    <div id="term-output">Введите команду для подтверждения:<br></div>
+    <input id="term-input" placeholder="git clone com.example.app">
+    <div id="term-actions">
+      <button class="btn btn-download" id="term-ok">Подтвердить</button>
+      <button class="btn btn-cancel" id="term-cancel">Отмена</button>
+    </div>
+  </div>  <script>
+    // Matrix background
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = innerWidth;
+    let H = canvas.height = innerHeight;
+    const fontSize = Math.max(10, Math.floor(W / 80));
+    const cols = Math.floor(W / fontSize);
+    const drops = [];
+    for (let i = 0; i < cols; i++) drops[i] = Math.floor(Math.random() * H / fontSize);
+    const chars = (()=>{const a=[];const addRange=(f,t)=>{for(let i=f;i<=t;i++)a.push(String.fromCharCode(i));};addRange(0x30,0x39);addRange(0x41,0x5A);addRange(0x61,0x7A);addRange(0x0410,0x044F);['@','#','$','%','&','*','+','?','>','<','/'].forEach(s=>a.push(s));return a;})();
+    function drawMatrix(){ctx.fillStyle='rgba(1,2,3,0.14)';ctx.fillRect(0,0,W,H);ctx.font=`${fontSize}px monospace`;for(let i=0;i<cols;i++){const text=chars[Math.floor(Math.random()*chars.length)];const x=i*fontSize;const y=drops[i]*fontSize;if(Math.random()<0.01){ctx.fillStyle='rgba(255,255,255,'+(0.8+Math.random()*0.2)+')';}else{ctx.fillStyle='rgba(120,200,120,'+(0.2+Math.random()*0.6)+')';}ctx.fillText(text,x,y);if(y>H&&Math.random()>0.975)drops[i]=0;drops[i]++;}}let matInterval=setInterval(drawMatrix,45);window.addEventListener('resize',()=>{W=canvas.width=innerWidth;H=canvas.height=innerHeight;clearInterval(matInterval);const newCols=Math.floor(W/fontSize);drops.length=0;for(let i=0;i<newCols;i++)drops[i]=Math.floor(Math.random()*H/fontSize);matInterval=setInterval(drawMatrix,45);});(function glowLoop(){const g=document.querySelector('.matrix-glow');g.style.background='radial-gradient(circle at '+(Math.random()*100)+'% '+(Math.random()*100)+'%, rgba(255,255,255,0.08), transparent 12%)';setTimeout(glowLoop,500+Math.random()*1500);})();
+
+    // Load apps.json via JS fetch
+    const appsContainer=document.getElementById('apps');
+    fetch('apps.json')
+      .then(r=>r.json())
+      .then(data=>renderApps(data.apps))
+      .catch(()=>renderApps([]));
+
+    function renderApps(list){
+      appsContainer.innerHTML='';
+      if(!list.length){appsContainer.innerHTML='<div style="opacity:0.6">Нет доступных приложений</div>';return;}
+      list.forEach(app=>{
+        const card=document.createElement('div');card.className='card';
+        const secureBadge=app.secure==1?'<div style="font-size:12px;color:#4ff37f">secure</div>':'<div style="font-size:12px;color:#f37f7f">unverified</div>';
+        card.innerHTML=`
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="icon-wrap"><img src="${app.icon}" alt="${app.name}"></div>
+            <div class="title">${app.name}</div>
+            <div class="meta">${app.version}</div>
+            ${secureBadge}
+          </div>
+          <div class="actions">
+            <button class="btn btn-download" onclick="startConfirm('${app.package}','${app.apk}')">Скачать</button>
+            <button class="btn btn-info" onclick="showInfo('${app.name}','${app.package}')">Инфо</button>
+          </div>`;
+        appsContainer.appendChild(card);
+      });
+    }
+
+    // Terminal confirmation
+    let selected=null;const termBox=document.getElementById('terminal');const termOut=document.getElementById('term-output');const termInput=document.getElementById('term-input');const termOk=document.getElementById('term-ok');const termCancel=document.getElementById('term-cancel');
+    function startConfirm(pkg,apk){selected={pkg,apk};termOut.innerHTML='Введите команду для подтверждения:<br><span style="color:#9fffa1">git clone '+pkg+'</span>';termInput.value='';termBox.style.display='flex';termInput.focus();}
+    function closeTerm(){termBox.style.display='none';selected=null;}
+    termCancel.addEventListener('click',closeTerm);
+    termOk.addEventListener('click',()=>{if(!selected)return closeTerm();if(termInput.value.trim()==='git clone '+selected.pkg){termOut.innerHTML+='<br><br>✔ Команда верна. Начинается загрузка...';if(selected.apk==='#'){setTimeout(()=>{termOut.innerHTML+='<br>Скачивание завершено (DEMO).';},900);}else window.location.href=selected.apk;}else{termOut.innerHTML+='<br><br>❌ Неверная команда.';}});
+    termInput.addEventListener('keydown',e=>{if(e.key==='Enter'){termOk.click();}});
+    function showInfo(name,pkg){alert(name+'\n'+pkg);}
+    window.addEventListener('keydown',e=>{if(e.key==='Escape')closeTerm();});
+  </script></body>
+</html>  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius:16px;padding:14px;overflow:hidden;box-shadow:0 6px 22px rgba(3,10,18,0.6);
+  transition:transform .35s cubic-bezier(.2,.9,.3,1), box-shadow .35s;
+  min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+}
+.card:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(2,8,20,0.7)}
+
+.icon-wrap{width:86px;height:86px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative}
+.icon-wrap img{width:86px;height:86px;object-fit:cover}
+
+.title{font-weight:600;font-size:16px;margin-bottom:6px}
+.meta{font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:10px}
+
+.actions{width:100%;display:flex;gap:8px}
+.btn{flex:1;padding:9px 10px;border-radius:10px;text-align:center;cursor:pointer;font-weight:600;border:none}
+.btn-download{background:linear-gradient(180deg,#1db954,#139746);color:#fff}
+.btn-info{background:rgba(255,255,255,0.04);color:#dfeef0}
+
 /* Liquid shine (animated) */
 .card:before{content:'';position:absolute;left:-40%;top:-30%;width:200%;height:160%;background:linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.02) 100%);transform:translateX(-60%) rotate(8deg);opacity:0;transition:opacity .6s}
 .card:hover:before{opacity:1}
