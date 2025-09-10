@@ -1,0 +1,236 @@
+<!doctype html>
+
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>gitStore — Магазин приложений</title>
+  <style>
+    /* Reset */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:#e9eef6;
+      overflow:hidden; /* чтобы фон занимал весь экран без скролла */
+      background: #020204;
+    }/* Canvas с эффектом "матрицы" */
+#matrix {
+  position:fixed;left:0;top:0;width:100%;height:100%;z-index:0;
+  display:block; background:linear-gradient(180deg,#020204 0%, #021022 100%);
+}
+
+/* Контейнер приложения */
+.wrap{
+  position:relative;z-index:5;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:60px 20px;
+}
+
+h1{font-size:28px;margin-bottom:18px;letter-spacing:0.4px}
+.subtitle{color:rgba(255,255,255,0.65);margin-bottom:24px}
+
+/* Grid карточек */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;width:100%;max-width:1100px}
+
+/* Liquid glass карточка */
+.card{
+  position:relative;backdrop-filter: blur(8px) saturate(140%);-webkit-backdrop-filter: blur(8px) saturate(140%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius:16px;padding:14px;overflow:hidden;box-shadow:0 6px 22px rgba(3,10,18,0.6);
+  transition:transform .35s cubic-bezier(.2,.9,.3,1), box-shadow .35s;
+  min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+}
+.card:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(2,8,20,0.7)}
+
+.icon-wrap{width:86px;height:86px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative}
+.icon-wrap img{width:86px;height:86px;object-fit:cover}
+
+.title{font-weight:600;font-size:16px;margin-bottom:6px}
+.meta{font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:10px}
+
+.actions{width:100%;display:flex;gap:8px}
+.btn{flex:1;padding:9px 10px;border-radius:10px;text-align:center;cursor:pointer;font-weight:600;border:none}
+.btn-download{background:linear-gradient(180deg,#1db954,#139746);color:#fff}
+.btn-info{background:rgba(255,255,255,0.04);color:#dfeef0}
+
+/* Liquid shine (animated) */
+.card:before{content:'';position:absolute;left:-40%;top:-30%;width:200%;height:160%;background:linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.02) 100%);transform:translateX(-60%) rotate(8deg);opacity:0;transition:opacity .6s}
+.card:hover:before{opacity:1}
+
+/* Терминал подтверждения */
+#terminal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;width:420px;max-width:92vw;background:rgba(7,12,18,0.9);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.06);display:none;flex-direction:column;gap:8px}
+#term-output{background:#06070a;border-radius:8px;padding:10px;min-height:80px;color:#8fffa1;font-family:monospace;font-size:13px;overflow:auto}
+#term-input{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#e6ffe6;padding:10px;border-radius:8px;font-family:monospace}
+#term-actions{display:flex;gap:8px}
+.btn-cancel{background:#2b2b2b;color:#fff}
+
+/* Мелкие адаптивы */
+@media (max-width:520px){h1{font-size:20px}.grid{gap:12px}}
+
+/* Стили для фейкового фавикона/логотипа */
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.logo .mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#6EE7B7,#3B82F6);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+
+/* subtle pulse for white symbols in matrix */
+.matrix-glow{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
+
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+  <div class="matrix-glow" aria-hidden></div>  <div class="wrap">
+    <div class="logo">
+      <div class="mark">gS</div>
+      <div>
+        <h1>gitStore</h1>
+        <div class="subtitle">Магазин приложений — клонируй, подтверждай и ставь</div>
+      </div>
+    </div><div class="grid" id="apps"></div>
+
+  </div>  <!-- Терминал подтверждения -->  <div id="terminal">
+    <div id="term-output">Введите команду для подтверждения:<br></div>
+    <input id="term-input" placeholder="git clone com.example.app">
+    <div id="term-actions">
+      <button class="btn btn-download" id="term-ok">Подтвердить</button>
+      <button class="btn btn-cancel" id="term-cancel">Отмена</button>
+    </div>
+  </div>  <script>
+    /* --------- Matrix background --------- */
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = innerWidth;
+    let H = canvas.height = innerHeight;
+
+    const fontSize = Math.max(10, Math.floor(W / 80));
+    const cols = Math.floor(W / fontSize);
+    const drops = [];
+    for (let i = 0; i < cols; i++) drops[i] = Math.floor(Math.random() * H / fontSize);
+
+    // символы: смешиваем кириллицу, латиницу, цифры и спецсимволы
+    const chars = (function(){
+      const a = [];
+      const addRange = (from,to) => { for(let i=from;i<=to;i++) a.push(String.fromCharCode(i)); };
+      addRange(0x30,0x39); // 0-9
+      addRange(0x41,0x5A); // A-Z
+      addRange(0x61,0x7A); // a-z
+      // кириллица
+      addRange(0x0410,0x044F);
+      // спец
+      const specials = ['@','#','$','%','&','*','+','?','>','<','/'];
+      specials.forEach(s=>a.push(s));
+      return a;
+    })();
+
+    function drawMatrix(){
+      ctx.fillStyle = 'rgba(1,2,3,0.14)';
+      ctx.fillRect(0,0,W,H);
+      ctx.font = `${fontSize}px monospace`;
+
+      for(let i=0;i<cols;i++){
+        const text = chars[Math.floor(Math.random()*chars.length)];
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        // иногда делаем яркий белый символ
+        if (Math.random() < 0.01) {
+          ctx.fillStyle = 'rgba(255,255,255,' + (0.8 + Math.random()*0.2) + ')';
+        } else {
+          ctx.fillStyle = 'rgba(120,200,120,' + (0.2 + Math.random()*0.6) + ')';
+        }
+        ctx.fillText(text, x, y);
+
+        if (y > H && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+
+    let matInterval = setInterval(drawMatrix, 45);
+
+    window.addEventListener('resize', ()=>{
+      W = canvas.width = innerWidth; H = canvas.height = innerHeight;
+      clearInterval(matInterval);
+      // recalc
+      const newCols = Math.floor(W / fontSize);
+      drops.length = 0;
+      for (let i = 0; i < newCols; i++) drops[i] = Math.floor(Math.random()*H/fontSize);
+      matInterval = setInterval(drawMatrix, 45);
+    });
+
+    /* subtle white flashes overlay (glow) */
+    (function glowLoop(){
+      const g = document.querySelector('.matrix-glow');
+      g.style.background = 'radial-gradient(circle at '+(Math.random()*100)+'% '+(Math.random()*100)+'%, rgba(255,255,255,0.08), transparent 12%)';
+      setTimeout(glowLoop, 500 + Math.random()*1500);
+    })();
+
+    /* --------- Load apps.json (fallback sample) --------- */
+    const appsContainer = document.getElementById('apps');
+    const fallback = {
+      apps:[
+        {name:'gitBrowser', package:'com.gitstore.browser', version:'1.0', icon:'https://via.placeholder.com/80x80.png?text=G', apk:'#'},
+        {name:'gitGame', package:'com.gitstore.game', version:'1.2', icon:'https://via.placeholder.com/80x80.png?text=Game', apk:'#'}
+      ]
+    };
+
+    fetch('apps.json').then(r=>r.json()).then(data=>renderApps(data.apps)).catch(e=>renderApps(fallback.apps));
+
+    function renderApps(list){
+      appsContainer.innerHTML='';
+      list.forEach(app=>{
+        const card = document.createElement('div');card.className='card';
+        card.innerHTML = `
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div class="icon-wrap"><img src="${app.icon}" alt="${app.name}"></div>
+            <div class="title">${app.name}</div>
+            <div class="meta">${app.version}</div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-download" onclick="startConfirm('${app.package.replace(/'/g,'\\\'')}', '${app.apk.replace(/'/g,'\\\'')}')">Скачать</button>
+            <button class="btn btn-info" onclick="showInfo('${app.name.replace(/'/g,'\\\'')}', '${app.package.replace(/'/g,'\\\'')}')">Инфо</button>
+          </div>
+        `;
+        appsContainer.appendChild(card);
+      });
+    }
+
+    /* --------- Terminal confirmation logic --------- */
+    let selected = null;
+    const termBox = document.getElementById('terminal');
+    const termOut = document.getElementById('term-output');
+    const termInput = document.getElementById('term-input');
+    const termOk = document.getElementById('term-ok');
+    const termCancel = document.getElementById('term-cancel');
+
+    function startConfirm(pkg, apk){
+      selected = {pkg, apk};
+      termOut.innerHTML = 'Введите команду для подтверждения:\n';
+      termOut.innerHTML += `<span style="color:#9fffa1">git clone ${pkg}</span>`;
+      termInput.value = '';
+      termBox.style.display = 'flex';
+      termInput.focus();
+    }
+
+    function closeTerm(){ termBox.style.display='none'; selected=null; }
+
+    termCancel.addEventListener('click', closeTerm);
+
+    termOk.addEventListener('click', ()=>{
+      if(!selected) return closeTerm();
+      if(termInput.value.trim() === `git clone ${selected.pkg}`){
+        termOut.innerHTML += '\n\n✔ Команда верна. Начинается загрузка...';
+        // если apk == '#', мы просто имитируем
+        if(selected.apk === '#'){ setTimeout(()=>{termOut.innerHTML += '\nСкачивание завершено (DEMO).';},900); }
+        else window.location.href = selected.apk;
+      } else {
+        termOut.innerHTML += '\n\n❌ Неверная команда.';
+      }
+    });
+
+    termInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ termOk.click(); } });
+
+    function showInfo(name, pkg){ alert(name + '\n' + pkg); }
+
+    /* tiny accessibility: close terminal with ESC */
+    window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeTerm(); });
+  </script></body>
+</html>
