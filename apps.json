@@ -4,29 +4,5 @@
     "desc": "Оффициальный магазин Google.",
     "icon": "images/playmarket.webp",
     "file": "apps/playmarket.apk"
-  },
-  {
-    "name": "App Two (без иконки)",
-    "desc": "Тут нет аватарки → подставится 404.png",
-    "icon": "",
-    "file": "apps/app2.apk"
-  },
-  {
-    "name": "App Three (недоступно)",
-    "desc": "APK нет, кнопка станет серой.",
-    "icon": "images/app3.png",
-    "file": ""
-  },
-  {
-    "name": "App Three (недоступно)",
-    "desc": "APK нет, кнопка станет серой.",
-    "icon": "images/app3.png",
-    "file": ""
-  },
-  {
-    "name": "App Three (недоступно)",
-    "desc": "asdsdasd",
-    "icon": "images/app3.png",
-    "file": ""
   }
 ]
