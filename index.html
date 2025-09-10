@@ -12,24 +12,38 @@
     <p>Магазин APK приложений на GitHub Pages 🚀</p>
   </header>
 
-  <main class="grid">
-    <div class="card">
-      <img src="images/app1.png" alt="App 1">
-      <h2>App One</h2>
-      <p>Описание первого приложения.</p>
-      <a href="apps/app1.apk" class="btn">Скачать</a>
-    </div>
-
-    <div class="card">
-      <img src="images/app2.png" alt="App 2">
-      <h2>App Two</h2>
-      <p>Описание второго приложения.</p>
-      <a href="apps/app2.apk" class="btn">Скачать</a>
-    </div>
+  <main class="grid" id="apps-container">
+    <!-- Карточки будут подгружаться из apps.json -->
   </main>
 
   <footer>
     <p>© 2025 gitStore</p>
   </footer>
+
+  <script>
+    async function loadApps() {
+      try {
+        const response = await fetch("apps.json");
+        const apps = await response.json();
+        const container = document.getElementById("apps-container");
+
+        apps.forEach(app => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <img src="${app.icon}" alt="${app.name}">
+            <h2>${app.name}</h2>
+            <p>${app.desc}</p>
+            <a href="${app.file}" class="btn">Скачать</a>
+          `;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Ошибка загрузки приложений:", error);
+      }
+    }
+
+    loadApps();
+  </script>
 </body>
 </html>
