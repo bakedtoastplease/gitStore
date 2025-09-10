@@ -1,10 +1,10 @@
-/* Общий стиль */
+/* Базовый стиль */
 body, html {
   margin: 0;
   padding: 0;
-  font-family: monospace;
+  font-family: 'Segoe UI', monospace;
   background: #000;
-  color: white;
+  color: #fff;
   overflow-x: hidden;
 }
 
@@ -13,17 +13,17 @@ body, html {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: #fff;
+  background: #000;
   z-index: -1;
 }
 
-/* Хедер */
+/* Шапка */
 header {
   position: sticky;
   top: 0;
   background: rgba(0,0,0,0.7);
   backdrop-filter: blur(6px);
-  padding: 10px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,8 +33,110 @@ header {
 header h1 {
   margin: 0;
   font-size: clamp(20px, 3vw, 28px);
+  letter-spacing: 2px;
 }
 
+/* Категории */
+nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+nav button {
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+nav button:hover,
+nav button.active {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Список приложений */
+#app-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.app-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: 0.3s;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.app-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255,255,255,0.15);
+}
+
+.app-card img {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  margin-bottom: 10px;
+}
+
+.app-card h3 {
+  font-size: 16px;
+  margin: 5px 0;
+  text-align: center;
+}
+
+.app-card small {
+  opacity: 0.7;
+  font-size: 12px;
+}
+
+/* Терминал */
+#terminal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hidden { display: none; }
+
+.terminal-content {
+  width: 90%;
+  max-width: 600px;
+  background: black;
+  border: 2px solid #0f0;
+  padding: 20px;
+  color: #0f0;
+  font-size: 14px;
+  border-radius: 12px;
+}
+
+#terminal-input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  border: none;
+  outline: none;
+  background: black;
+  color: #0f0;
+  font-family: monospace;
+  }
 /* Категории */
 nav {
   display: flex;
