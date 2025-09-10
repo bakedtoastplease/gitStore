@@ -7,94 +7,44 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Матрица-фон -->
   <canvas id="matrix"></canvas>
 
   <header>
     <h1>gitStore</h1>
     <p>Магазин APK приложений на GitHub Pages 🚀</p>
+
+    <!-- Категории подгружаются динамически -->
+    <div class="categories" id="categories"></div>
   </header>
 
-  <main class="grid" id="apps-container">
-    <!-- Карточки будут подгружаться из apps.json -->
+  <main class="grid" id="appGrid">
+    <!-- Приложения пока оставим вручную, потом можно вынести в apps.json -->
+    <div class="card" data-category="games">
+      <img src="images/app1.png" alt="App 1" onerror="this.src='images/404.png'">
+      <h2>App One</h2>
+      <p>Описание первого приложения (игра).</p>
+      <a href="apps/app1.apk" class="btn">Скачать</a>
+    </div>
+
+    <div class="card" data-category="tools">
+      <img src="images/app2.png" alt="App 2" onerror="this.src='images/404.png'">
+      <h2>App Two</h2>
+      <p>Утилита для системы.</p>
+      <a href="apps/app2.apk" class="btn">Скачать</a>
+    </div>
+
+    <div class="card" data-category="social">
+      <img src="images/app3.png" alt="App 3" onerror="this.src='images/404.png'">
+      <h2>App Three</h2>
+      <p>Социальное приложение.</p>
+      <a href="#" class="btn disabled">Недоступно</a>
+    </div>
   </main>
 
   <footer>
     <p>© 2025 gitStore</p>
   </footer>
 
-  <!-- Подгрузка приложений -->
-  <script>
-    async function loadApps() {
-      try {
-        const response = await fetch("apps.json");
-        const apps = await response.json();
-        const container = document.getElementById("apps-container");
-
-        apps.forEach(app => {
-          const card = document.createElement("div");
-          card.className = "card";
-
-          // Если нет иконки → ставим 404
-          const icon = app.icon && app.icon.trim() !== "" ? app.icon : "images/404.png";
-
-          // Если нет файла → кнопка Недоступно
-          const btn = app.file && app.file.trim() !== "" 
-            ? `<a href="${app.file}" class="btn">Скачать</a>`
-            : `<span class="btn disabled">Недоступно</span>`;
-
-          card.innerHTML = `
-            <img src="${icon}" alt="${app.name}" onerror="this.src='images/404.png'">
-            <h2>${app.name}</h2>
-            <p>${app.desc}</p>
-            ${btn}
-          `;
-          container.appendChild(card);
-        });
-      } catch (error) {
-        console.error("Ошибка загрузки приложений:", error);
-      }
-    }
-    loadApps();
-  </script>
-
-  <!-- Матрица-анимация -->
-  <script>
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
-
-    canvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
-
-    const letters = "01";
-    const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops = Array(Math.floor(columns)).fill(1);
-
-    function draw() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#0f0";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    }
-
-    setInterval(draw, 35);
-
-    window.addEventListener("resize", () => {
-      canvas.height = window.innerHeight;
-      canvas.width = window.innerWidth;
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
