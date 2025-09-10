@@ -1,118 +1,524 @@
-/* ====== Общие стили ====== */
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(-45deg, #000000, #001a00, #004400, #008800);
-  background-size: 400% 400%;
-  animation: gradientMove 20s ease infinite;
-  color: #e0ffe0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+/* style.css — стиль Liquid Glass для gitStore (матрица) */
+/* В духе Apple's Liquid Design с улучшенными стеклянными эффектами */
+
+@font-face {
+    font-family: 'SF Pro Display';
+    src: url('font.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
-/* Анимация плавного градиента */
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-/* ====== Хедер ====== */
+:root {
+    --neon-primary: #00ff8c;
+    --neon-secondary: #00e676;
+    --neon-accent: #00ffaa;
+    --neon-glow: 0 0 10px rgba(0, 255, 140, 0.4),
+                0 0 20px rgba(0, 255, 170, 0.2),
+                0 0 30px rgba(0, 230, 118, 0.1);
+    --neon-text-glow: 0 0 5px rgba(0, 255, 140, 0.7);
+    --muted: #a8e6cf;
+    --dark-bg: #000c08;
+    --panel: rgba(0, 20, 12, 0.7);
+    --glass-border: 1px solid rgba(0, 255, 140, 0.15);
+    --radius: 20px;
+    --radius-lg: 28px;
+    --max-width: 1280px;
+    --transition-slow: 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+    --transition-fast: 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Общая страница */
+html, body {
+    height: 100%;
+    background: var(--dark-bg);
+    color: var(--neon-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+}
+
+/* Canvas (матрица) — фиксированный фон */
+#matrix {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    display: block;
+    pointer-events: none;
+}
+
+/* Улучшенный затемняющий слой с градиентом */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0, 30, 15, 0.4) 0%, rgba(0, 12, 6, 0.9) 70%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Хедер с улучшенным стеклянным эффектом в стиле Apple */
 header {
-  text-align: center;
-  padding: 30px 10px;
-  color: #00ff99;
+    width: 100%;
+    padding: 2rem 1.5rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px) saturate(200%);
+    -webkit-backdrop-filter: blur(20px) saturate(200%);
+    background: rgba(0, 20, 10, 0.5);
+    border-bottom: 1px solid rgba(0, 255, 140, 0.1);
+    box-shadow: 0 1px 0 rgba(0, 255, 140, 0.05);
 }
 
+/* Логотип и слоган */
 header h1 {
-  font-size: 2.8em;
-  margin: 0;
-  text-shadow: 0 0 15px #00ff99, 0 0 30px #00cc66;
+    font-size: clamp(2rem, 5vw, 3rem);
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--neon-primary) 0%, var(--neon-accent) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: var(--neon-text-glow);
+    font-weight: 800;
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.5rem;
 }
 
 header p {
-  margin: 8px 0 0;
-  font-size: 1.1em;
-  color: #aaffcc;
+    color: var(--muted);
+    font-size: 1.1rem;
+    text-align: center;
+    max-width: 600px;
+    line-height: 1.6;
+    font-weight: 300;
+    letter-spacing: 0.3px;
 }
 
-/* ====== Сетка приложений ====== */
+/* Контейнер категорий */
+.categories-container {
+    width: min(95%, var(--max-width));
+    margin: 1.5rem auto 0;
+    position: relative;
+}
+
+/* Категории */
+.categories {
+    display: flex;
+    gap: 0.8rem;
+    padding: 1.2rem 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+}
+
+.categories::-webkit-scrollbar {
+    display: none;
+}
+
+/* Кнопки категорий в стиле iOS */
+.categories button {
+    background: rgba(0, 20, 10, 0.4);
+    border: 1px solid rgba(0, 255, 140, 0.2);
+    color: var(--muted);
+    padding: 0.8rem 1.6rem;
+    font-size: 1rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    font-weight: 500;
+}
+
+.categories button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 255, 140, 0.1) 0%, rgba(0, 230, 118, 0.05) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.categories button:hover {
+    color: var(--neon-primary);
+    border-color: rgba(0, 255, 140, 0.4);
+    transform: translateY(-2px);
+}
+
+.categories button:hover::before {
+    opacity: 1;
+}
+
+.categories button.active {
+    background: linear-gradient(135deg, rgba(0, 255, 140, 0.2) 0%, rgba(0, 230, 118, 0.15) 100%);
+    border-color: rgba(0, 255, 140, 0.4);
+    color: var(--neon-primary);
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0, 255, 140, 0.2);
+}
+
+/* Сетка карточек */
 .grid {
-  display: grid;
-  gap: 20px;
-  padding: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  flex: 1;
+    width: min(95%, var(--max-width));
+    margin: 2.5rem auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    align-items: start;
+    z-index: 2;
+    position: relative;
+    padding-bottom: 3rem;
 }
 
-/* ====== Карточки ====== */
+/* Карточка — улучшенный стеклянный морфизм в стиле Liquid */
 .card {
-  background: rgba(0, 20, 0, 0.8);
-  border: 1px solid rgba(0, 255, 128, 0.3);
-  border-radius: 15px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 0 20px rgba(0, 255, 128, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+    background: linear-gradient(135deg, rgba(0, 20, 12, 0.7) 0%, rgba(0, 15, 8, 0.5) 100%);
+    border-radius: var(--radius-lg);
+    border: var(--glass-border);
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition-slow);
+    will-change: transform;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Эффект жидкого стекла с градиентным свечением */
+.card::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(0, 255, 140, 0.03), rgba(0, 230, 118, 0.02), transparent);
+    transform: rotate(45deg);
+    transition: all 0.8s ease;
+    pointer-events: none;
+}
+
+.card:hover::before {
+    animation: liquidShine 2s forwards;
+}
+
+@keyframes liquidShine {
+    0% {
+        left: -50%;
+        top: -50%;
+    }
+    100% {
+        left: 100%;
+        top: 100%;
+    }
+}
+
+/* Градиентная обводка при наведении */
+.card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+    padding: 1.5px;
+    background: linear-gradient(135deg, rgba(0, 255, 140, 0.3), rgba(0, 230, 118, 0.1), rgba(0, 255, 140, 0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--transition-slow);
+}
+
+.card:hover::after {
+    opacity: 1;
 }
 
 .card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 0 25px rgba(0, 255, 128, 0.3);
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: var(--neon-glow), 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(0, 255, 140, 0.4);
 }
 
-.card img {
-  width: 80px;
-  height: 80px;
-  border-radius: 15px;
-  margin-bottom: 15px;
-  object-fit: cover;
-  border: 2px solid rgba(0, 255, 128, 0.5);
+/* Иконка приложения */
+.card-image {
+    width: 110px;
+    height: 110px;
+    border-radius: 24px;
+    object-fit: cover;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 255, 140, 0.1);
+    transition: all var(--transition-slow);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
+.card:hover .card-image {
+    transform: rotate(5deg) scale(1.1);
+    box-shadow: 0 12px 30px rgba(0, 255, 140, 0.2), 0 0 0 1px rgba(0, 255, 140, 0.2);
+    filter: brightness(1.1) drop-shadow(0 0 8px rgba(0, 255, 140, 0.3));
+}
+
+/* Заголовок и описание */
 .card h2 {
-  font-size: 1.3em;
-  margin: 10px 0;
-  color: #00ff88;
+    font-size: 1.4rem;
+    margin-top: 1.2rem;
+    color: var(--neon-primary);
+    text-shadow: var(--neon-text-glow);
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.3px;
 }
 
 .card p {
-  font-size: 0.95em;
-  color: #cceedd;
-  margin-bottom: 15px;
+    font-size: 1rem;
+    color: var(--muted);
+    margin: 1rem 0 1.5rem;
+    line-height: 1.6;
+    text-align: center;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    position: relative;
+    z-index: 1;
+    font-weight: 300;
 }
 
-/* ====== Кнопки ====== */
+/* Кнопка скачать в стиле Apple */
 .btn {
-  display: inline-block;
-  padding: 10px 20px;
-  background: #00ff88;
-  color: #000;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background 0.3s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--neon-primary) 0%, var(--neon-secondary) 100%);
+    color: #00110a;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 5px 15px rgba(0, 255, 140, 0.3);
+    transition: all var(--transition-fast);
+    margin-top: 0.8rem;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+}
+
+.btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.btn:hover::before {
+    opacity: 1;
 }
 
 .btn:hover {
-  background: #00cc66;
-  transform: scale(1.05);
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 10px 25px rgba(0, 255, 140, 0.4);
 }
 
+/* Недоступная кнопка */
 .btn.disabled {
-  background: #333;
-  color: #888;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
+    background: linear-gradient(135deg, rgba(60, 60, 60, 0.6) 0%, rgba(40, 40, 40, 0.6) 100%);
+    color: #777;
+    box-shadow: none;
+    cursor: not-allowed;
 }
 
-/* ====== Футер ====== */
+.btn.disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Подпись внизу */
 footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 0.9em;
-  color: #88ffaa;
-  border-top: 1px solid rgba(0, 255, 128, 0.2);
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--muted);
+    margin-top: 3rem;
+    z-index: 2;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+}
+
+footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-primary), transparent);
+    opacity: 0.5;
+}
+
+/* Анимация появления для карточек */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
+.card:nth-child(6) { animation-delay: 0.6s; }
+.card:nth-child(7) { animation-delay: 0.7s; }
+.card:nth-child(8) { animation-delay: 0.8s; }
+
+/* Удобная утилита: центрировать контент по высоте если мало карт */
+.main-empty {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 1.3rem;
+    text-align: center;
+    padding: 3rem;
+    font-weight: 300;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .card {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        padding: 0 1rem 2rem;
+    }
+    
+    .card {
+        min-height: 300px;
+        padding: 1.5rem;
+        border-radius: var(--radius);
+    }
+    
+    .card-image {
+        width: 100px;
+        height: 100px;
+    }
+    
+    header {
+        padding: 1.5rem 1rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .categories {
+        padding: 1rem 0;
+    }
+    
+    .categories button {
+        padding: 0.7rem 1.4rem;
+        font-size: 0.95rem;
+    }
+    
+    .card {
+        padding: 1.2rem;
+    }
+    
+    .btn {
+        padding: 0.9rem 1.8rem;
+    }
+}
+
+/* Специальные эффекты для Safari */
+@supports (-webkit-backdrop-filter: blur(20px)) {
+    header, .card, footer {
+        -webkit-backdrop-filter: blur(20px) saturate(200%);
+    }
+}
+
+/* Эффект параллакса для карточек при движении мыши */
+@media (hover: hover) and (pointer: fine) {
+    .grid {
+        perspective: 1000px;
+    }
+    
+    .card {
+        transform-style: preserve-3d;
+        transform: translateZ(0);
+    }
+    
+    .card:hover {
+        transform: translateY(-12px) scale(1.02) rotateX(2deg) rotateY(2deg);
+    }
 }
