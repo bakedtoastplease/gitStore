@@ -1,82 +1,118 @@
-/* Анимированный фон */
+/* ====== Общие стили ====== */
 body {
   margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  background: linear-gradient(-45deg, #001a00, #003300, #004d00, #00b300);
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(-45deg, #000000, #001a00, #004400, #008800);
   background-size: 400% 400%;
-  animation: gradientMove 15s ease infinite;
-  font-family: Arial, sans-serif;
-  color: white;
+  animation: gradientMove 20s ease infinite;
+  color: #e0ffe0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Плавное движение градиента */
+/* Анимация плавного градиента */
 @keyframes gradientMove {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
-/* Карточки приложений */
-.card {
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 15px;
-  padding: 15px;
+/* ====== Хедер ====== */
+header {
   text-align: center;
-  color: white;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 30px 10px;
+  color: #00ff99;
+}
+
+header h1 {
+  font-size: 2.8em;
+  margin: 0;
+  text-shadow: 0 0 15px #00ff99, 0 0 30px #00cc66;
+}
+
+header p {
+  margin: 8px 0 0;
+  font-size: 1.1em;
+  color: #aaffcc;
+}
+
+/* ====== Сетка приложений ====== */
+.grid {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  flex: 1;
+}
+
+/* ====== Карточки ====== */
+.card {
+  background: rgba(0, 20, 0, 0.8);
+  border: 1px solid rgba(0, 255, 128, 0.3);
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0, 255, 128, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 6px 25px rgba(0, 255, 0, 0.6);
+  transform: translateY(-6px);
+  box-shadow: 0 0 25px rgba(0, 255, 128, 0.3);
 }
 
 .card img {
-  width: 100px;
-  height: 100px;
-  border-radius: 20%;
-  margin-bottom: 10px;
+  width: 80px;
+  height: 80px;
+  border-radius: 15px;
+  margin-bottom: 15px;
   object-fit: cover;
+  border: 2px solid rgba(0, 255, 128, 0.5);
 }
 
-/* Кнопки */
+.card h2 {
+  font-size: 1.3em;
+  margin: 10px 0;
+  color: #00ff88;
+}
+
+.card p {
+  font-size: 0.95em;
+  color: #cceedd;
+  margin-bottom: 15px;
+}
+
+/* ====== Кнопки ====== */
 .btn {
   display: inline-block;
-  margin-top: 10px;
-  padding: 8px 16px;
-  background: linear-gradient(90deg, #00cc00, #009900);
-  color: white;
-  text-decoration: none;
+  padding: 10px 20px;
+  background: #00ff88;
+  color: #000;
   border-radius: 8px;
+  text-decoration: none;
   font-weight: bold;
-  transition: background 0.3s ease;
+  transition: background 0.3s, transform 0.2s;
 }
 
 .btn:hover {
-  background: linear-gradient(90deg, #00ff00, #00b300);
+  background: #00cc66;
+  transform: scale(1.05);
 }
 
-/* Категории */
-#categories {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 20px 0;
+.btn.disabled {
+  background: #333;
+  color: #888;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
-#categories button {
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(0, 255, 0, 0.2);
-  color: white;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-#categories button:hover {
-  background: rgba(0, 255, 0, 0.4);
+/* ====== Футер ====== */
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.9em;
+  color: #88ffaa;
+  border-top: 1px solid rgba(0, 255, 128, 0.2);
 }
