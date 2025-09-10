@@ -1,28 +1,16 @@
-{
-  "apps": [
-    {
-      "name": "Hello Test",
-      "package": "com.hello.test",
-      "version": "1.0.0",
-      "icon": "icons/hello.png",
-      "apk": "apks/hello.apk",
-      "secure": 0
-    },
-    {
-      "name": "Secure Player",
-      "package": "com.player.secure",
-      "version": "2.3.1",
-      "icon": "icons/player.png",
-      "apk": "apks/player.apk",
-      "secure": 1
-    },
-    {
-      "name": "Git Notes",
-      "package": "com.git.notes",
-      "version": "0.9.5",
-      "icon": "icons/notes.png",
-      "apk": "apks/notes.apk",
-      "secure": 0
-    }
-  ]
-}
+[
+  {
+    "id": "com.calc.xiaomi",
+    "name": "Mi Calculator",
+    "icon": "https://raw.githubusercontent.com/github/explore/main/topics/javascript/javascript.png",
+    "category": "tools",
+    "secure": 1
+  },
+  {
+    "id": "com.hello.test",
+    "name": "Hello Test",
+    "icon": null,
+    "category": "games",
+    "secure": 0
+  }
+]
