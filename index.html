@@ -2,596 +2,64 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>gitStore</title>
-  <link rel="stylesheet" href="style.css">
+  <title>gitStore — Магазин приложений</title>
+  <style>
+    body { font-family: monospace; background: #111; color: #eee; }
+    .app { border: 1px solid #333; padding: 15px; margin: 10px; display: inline-block; width: 220px; text-align: center; background: #1e1e1e; border-radius: 10px; }
+    .app img { width: 80px; height: 80px; border-radius: 10px; }
+    .title { font-size: 16px; font-weight: bold; margin: 10px 0; }
+    button { background: #4CAF50; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #45a049; }
+    #terminal { display: none; background: black; color: lime; padding: 15px; margin: 20px auto; width: 500px; border-radius: 8px; font-family: monospace; }
+    input { background: black; color: lime; border: none; width: 100%; outline: none; }
+  </style>
 </head>
 <body>
-  <canvas id="matrix"></canvas>
-  
-  <header>
-    <h1>gitStore</h1>
-    <nav id="categories"></nav>
-  </header>
+  <h1>gitStore 🚀</h1>
+  <div id="apps"></div>
 
-  <main id="app-list"></main>
-
-  <div id="terminal" class="hidden">
-    <div class="terminal-content">
-      <pre id="terminal-output"></pre>
-      <input type="text" id="terminal-input" placeholder="git clone com.app.example">
-    </div>
+  <div id="terminal">
+    <div id="term-output">Введите команду для подтверждения:<br></div>
+    <input id="term-input" type="text" placeholder="git clone com.example.app">
   </div>
 
-  <script src="script.js"></script>
-</body>
-</html>.desc{font-size:13px;color:var(--muted);margin-top:6px}
-.meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
-.badge{padding:6px 8px;border-radius:8px;font-weight:700;font-size:12px}
-.badge.sec{background:rgba(80,200,140,0.12);color:#9fffcf;border:1px solid rgba(80,200,140,0.12)}
-.badge.unv{background:rgba(240,120,120,0.06);color:#ffd2d2;border:1px solid rgba(240,120,120,0.06)}
+  <script>
+    let selectedApp = null;
 
-.actions{display:flex;gap:8px;margin-top:6px}
-.btn{flex:1;padding:10px;border-radius:10px;border:none;cursor:pointer;font-weight:700}
-.btn-download{background:linear-gradient(180deg,#10b981,#059669);color:#fff}
-.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
-
-/* Terminal modal */
-#terminal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:30;width:480px;max-width:94vw;background:rgba(7,12,18,0.95);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.04);display:none;flex-direction:column;gap:8px}
-#term-output{background:#05060a;border-radius:8px;padding:10px;min-height:90px;color:#aaffc9;font-family:monospace;font-size:13px;overflow:auto}
-#term-input{background:transparent;border:1px solid rgba(255,255,255,0.04);color:#dfffe6;padding:10px;border-radius:8px;font-family:monospace}
-
-/* Responsive */
-@media (max-width:640px){.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.icon{width:72px;height:72px}}
-
-/* small helper */
-.placeholder{display:flex;align-items:center;justify-content:center;color:#9fb3b0;font-weight:800}
-
-  </style>
-</head>
-<body>
-  <canvas id="matrix"></canvas>
-  <div class="glow" aria-hidden></div>  <div class="wrap">
-    <div class="container">
-      <header>
-        <div class="logo-mark">gS</div>
-        <div>
-          <h1>gitStore</h1>
-          <p class="lead">Минималистичный, быстрый и красивый магазин приложений на GitHub Pages</p>
-        </div>
-      </header><div class="toolbar">
-    <div class="search" role="search" aria-label="Поиск по приложениям">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="margin-right:10px;opacity:0.8"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2"></circle></svg>
-      <input id="q" placeholder="Поиск по имени или пакету — например, com.hello.test" aria-label="Поиск">
-    </div>
-    <div class="filters">
-      <div class="chip" id="all">Все</div>
-      <div class="chip" id="verified">Только проверенные</div>
-    </div>
-  </div>
-
-  <main>
-    <div class="grid" id="apps" aria-live="polite"></div>
-  </main>
-</div>
-
-  </div>  <div id="terminal" role="dialog" aria-modal="true">
-    <div id="term-output">Введите команду для подтверждения:<br></div>
-    <input id="term-input" placeholder="git clone com.example.app" aria-label="Терминал подтверждения">
-    <div style="display:flex;gap:8px;margin-top:6px">
-      <button class="btn btn-download" id="term-ok">Подтвердить</button>
-      <button class="btn btn-ghost" id="term-cancel">Отмена</button>
-    </div>
-  </div>  <script>
-    // --- Matrix effect (lightweight) ---
-    (function(){
-      const canvas=document.getElementById('matrix');const ctx=canvas.getContext('2d');let w=canvas.width=innerWidth,h=canvas.height=innerHeight;const fontSize=Math.max(10,Math.floor(w/90));let cols=Math.floor(w/fontSize);let drops=new Array(cols).fill(0).map(()=>Math.floor(Math.random()*h/fontSize));
-      const chars=(()=>{const a=[];const add=(f,t)=>{for(let i=f;i<=t;i++)a.push(String.fromCharCode(i));};add(0x30,0x39);add(0x41,0x5A);add(0x61,0x7A);add(0x0410,0x044F);['@','#','$','%','&','*','+','?','>','<','/'].forEach(s=>a.push(s));return a;})();
-      function frame(){ctx.fillStyle='rgba(1,2,3,0.12)';ctx.fillRect(0,0,w,h);ctx.font=fontSize+'px monospace';for(let i=0;i<cols;i++){const ch=chars[(Math.random()*chars.length)|0];const x=i*fontSize;const y=drops[i]*fontSize;ctx.fillStyle=(Math.random()<0.012)?'rgba(255,255,255,'+(0.85+Math.random()*0.15)+')':'rgba(100,200,130,'+(0.18+Math.random()*0.5)+')';ctx.fillText(ch,x,y);drops[i]++;if(y>h&&Math.random()>0.975)drops[i]=0;}requestAnimationFrame(frame);}frame();window.addEventListener('resize',()=>{w=canvas.width=innerWidth;h=canvas.height=innerHeight;cols=Math.floor(w/fontSize);drops=new Array(cols).fill(0).map(()=>Math.floor(Math.random()*h/fontSize));});
-    })();
-
-    // --- Utilities ---
-    function randomPlaceholderDataUrl(seedWidth=128,seedHeight=128){
-      const cvs=document.createElement('canvas');cvs.width=seedWidth;cvs.height=seedHeight;const ctx=cvs.getContext('2d');const id=ctx.createImageData(seedWidth,seedHeight);for(let i=0;i<id.data.length;i+=4){id.data[i]=Math.random()*255;id.data[i+1]=Math.random()*255;id.data[i+2]=Math.random()*255;id.data[i+3]=255;}ctx.putImageData(id,0,0);return cvs.toDataURL('image/png');
-    }
-
-    // --- Load apps.json with caching + graceful fallback ---
-    const appsContainer=document.getElementById('apps');
-    const qInput=document.getElementById('q');
-    const chipAll=document.getElementById('all');
-    const chipVerified=document.getElementById('verified');
-    let appsList=[];
-
-    async function loadApps(){
-      try{
-        const r=await fetch('apps.json', {cache:'no-store'});
-        const data=await r.json();
-        appsList=data.apps||[];
-      }catch(e){
-        appsList=[];
-      }
-      renderApps(appsList);
-    }
-
-    function renderApps(list){
-      appsContainer.innerHTML='';
-      if(!list.length){appsContainer.innerHTML='<div style="padding:30px;color:rgba(255,255,255,0.6)">Нет приложений в каталоге.</div>';return}
-      const fragment=document.createDocumentFragment();
-      for(const app of list){
-        const card=document.createElement('article');card.className='card';card.tabIndex=0;
-        const iconSrc=app.icon||'';
-        const imgEl=document.createElement('img');
-        imgEl.decoding='async';imgEl.loading='lazy';
-        if(iconSrc){imgEl.src=iconSrc;} else {imgEl.src=randomPlaceholderDataUrl();}
-        imgEl.onerror=()=>{imgEl.src=randomPlaceholderDataUrl();};
-
-        const iconWrap=document.createElement('div');iconWrap.className='icon';iconWrap.appendChild(imgEl);
-
-        const info=document.createElement('div');info.className='info';
-        const title=document.createElement('div');title.className='title';title.textContent=app.name||app.package||'Unknown';
-        const desc=document.createElement('div');desc.className='desc';desc.textContent=app.description||('Пакет: '+(app.package||'-'));
-
-        info.appendChild(title);info.appendChild(desc);
-
-        const top=document.createElement('div');top.className='top';top.appendChild(iconWrap);top.appendChild(info);
-
-        const meta=document.createElement('div');meta.className='meta';
-        const badge=document.createElement('div');badge.className='badge '+(app.secure==1?'sec':'unv');badge.textContent=(app.secure==1?'Проверено':'Непроверено');
-        const ver=document.createElement('div');ver.style.opacity=0.85;ver.textContent=app.version||'--';
-        meta.appendChild(badge);meta.appendChild(ver);
-
-        const actions=document.createElement('div');actions.className='actions';
-        const dl=document.createElement('button');dl.className='btn btn-download';dl.textContent='Скачать';
-        dl.addEventListener('click',()=>onDownloadClick(app));
-        const infoBtn=document.createElement('button');infoBtn.className='btn btn-ghost';infoBtn.textContent='Подробнее';infoBtn.addEventListener('click',()=>showInfo(app));
-        actions.appendChild(dl);actions.appendChild(infoBtn);
-
-        card.appendChild(top);card.appendChild(meta);card.appendChild(actions);
-        fragment.appendChild(card);
-      }
-      appsContainer.appendChild(fragment);
-    }
-
-    function showInfo(app){alert((app.name||app.package)+'
-
-'+(app.description||'Нет описания')+'
-
-package: '+(app.package||'-')+'
-version: '+(app.version||'-'))}
-
-    // --- Download logic: secure=1 => direct, secure=0 => terminal confirmation ---
-    const termBox=document.getElementById('terminal');const termOut=document.getElementById('term-output');const termInput=document.getElementById('term-input');const termOk=document.getElementById('term-ok');const termCancel=document.getElementById('term-cancel');let pending=null;
-
-    function onDownloadClick(app){if(app.secure==1){startDownload(app);}else{pending=app;termOut.innerHTML='Введите команду для подтверждения:
-
-<code style="color:#9fffa1">git clone '+app.package+'</code>';termInput.value='';termBox.style.display='flex';termInput.focus();}}
-    function startDownload(app){if(!app.apk||app.apk==='') {alert('APK не найден');return} window.location.href=app.apk}
-
-    termOk.addEventListener('click',()=>{if(!pending)return; if(termInput.value.trim()===('git clone '+pending.package)){termOut.innerHTML+='
-
-✔ Команда верна. Начинаем загрузку...';setTimeout(()=>startDownload(pending),600)}else{termOut.innerHTML+='
-
-❌ Неверная команда. Попробуйте снова.'}});
-    termCancel.addEventListener('click',()=>{termBox.style.display='none';pending=null});
-    termInput.addEventListener('keydown',e=>{if(e.key==='Enter')termOk.click()});
-
-    // --- Search + filters ---
-    qInput.addEventListener('input',()=>{const q=qInput.value.trim().toLowerCase();const filtered=appsList.filter(a=>{return (!q|| (a.name&&a.name.toLowerCase().includes(q))|| (a.package&&a.package.toLowerCase().includes(q)))});renderApps(filtered);});
-    chipAll.addEventListener('click',()=>{renderApps(appsList)});
-    chipVerified.addEventListener('click',()=>{renderApps(appsList.filter(a=>a.secure==1))});
-
-    // Load on start
-    loadApps();
-  </script></body>
-</html>  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius:16px;padding:14px;overflow:hidden;box-shadow:0 6px 22px rgba(3,10,18,0.6);
-  transition:transform .35s cubic-bezier(.2,.9,.3,1), box-shadow .35s;
-  min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
-}
-.card:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(2,8,20,0.7)}
-
-.icon-wrap{width:86px;height:86px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative}
-.icon-wrap img{width:86px;height:86px;object-fit:cover}
-
-.title{font-weight:600;font-size:16px;margin-bottom:6px}
-.meta{font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:10px}
-
-.actions{width:100%;display:flex;gap:8px}
-.btn{flex:1;padding:9px 10px;border-radius:10px;text-align:center;cursor:pointer;font-weight:600;border:none}
-.btn-download{background:linear-gradient(180deg,#1db954,#139746);color:#fff}
-.btn-info{background:rgba(255,255,255,0.04);color:#dfeef0}
-
-.card:before{content:'';position:absolute;left:-40%;top:-30%;width:200%;height:160%;background:linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.02) 100%);transform:translateX(-60%) rotate(8deg);opacity:0;transition:opacity .6s}
-.card:hover:before{opacity:1}
-
-#terminal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;width:420px;max-width:92vw;background:rgba(7,12,18,0.9);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.06);display:none;flex-direction:column;gap:8px}
-#term-output{background:#06070a;border-radius:8px;padding:10px;min-height:80px;color:#8fffa1;font-family:monospace;font-size:13px;overflow:auto}
-#term-input{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#e6ffe6;padding:10px;border-radius:8px;font-family:monospace}
-#term-actions{display:flex;gap:8px}
-.btn-cancel{background:#2b2b2b;color:#fff}
-
-@media (max-width:520px){h1{font-size:20px}.grid{gap:12px}}
-
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.logo .mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#6EE7B7,#3B82F6);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
-
-.matrix-glow{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
-
-  </style>
-</head>
-<body>
-  <canvas id="matrix"></canvas>
-  <div class="matrix-glow" aria-hidden></div>  <div class="wrap">
-    <div class="logo">
-      <div class="mark">gS</div>
-      <div>
-        <h1>gitStore</h1>
-        <div class="subtitle">Магазин приложений — клонируй, подтверждай и ставь</div>
-      </div>
-    </div><div class="grid" id="apps"></div>
-
-  </div>  <div id="terminal">
-    <div id="term-output">Введите команду для подтверждения:<br></div>
-    <input id="term-input" placeholder="git clone com.example.app">
-    <div id="term-actions">
-      <button class="btn btn-download" id="term-ok">Подтвердить</button>
-      <button class="btn btn-cancel" id="term-cancel">Отмена</button>
-    </div>
-  </div>  <script>
-    // Matrix background
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
-    let W = canvas.width = innerWidth;
-    let H = canvas.height = innerHeight;
-    const fontSize = Math.max(10, Math.floor(W / 80));
-    const cols = Math.floor(W / fontSize);
-    const drops = [];
-    for (let i = 0; i < cols; i++) drops[i] = Math.floor(Math.random() * H / fontSize);
-    const chars = (()=>{const a=[];const addRange=(f,t)=>{for(let i=f;i<=t;i++)a.push(String.fromCharCode(i));};addRange(0x30,0x39);addRange(0x41,0x5A);addRange(0x61,0x7A);addRange(0x0410,0x044F);['@','#','$','%','&','*','+','?','>','<','/'].forEach(s=>a.push(s));return a;})();
-    function drawMatrix(){ctx.fillStyle='rgba(1,2,3,0.14)';ctx.fillRect(0,0,W,H);ctx.font=`${fontSize}px monospace`;for(let i=0;i<cols;i++){const text=chars[Math.floor(Math.random()*chars.length)];const x=i*fontSize;const y=drops[i]*fontSize;if(Math.random()<0.01){ctx.fillStyle='rgba(255,255,255,'+(0.8+Math.random()*0.2)+')';}else{ctx.fillStyle='rgba(120,200,120,'+(0.2+Math.random()*0.6)+')';}ctx.fillText(text,x,y);if(y>H&&Math.random()>0.975)drops[i]=0;drops[i]++;}}let matInterval=setInterval(drawMatrix,45);window.addEventListener('resize',()=>{W=canvas.width=innerWidth;H=canvas.height=innerHeight;clearInterval(matInterval);const newCols=Math.floor(W/fontSize);drops.length=0;for(let i=0;i<newCols;i++)drops[i]=Math.floor(Math.random()*H/fontSize);matInterval=setInterval(drawMatrix,45);});(function glowLoop(){const g=document.querySelector('.matrix-glow');g.style.background='radial-gradient(circle at '+(Math.random()*100)+'% '+(Math.random()*100)+'%, rgba(255,255,255,0.08), transparent 12%)';setTimeout(glowLoop,500+Math.random()*1500);})();
-
-    // Load apps.json via JS fetch
-    const appsContainer=document.getElementById('apps');
-    fetch('apps.json')
-      .then(r=>r.json())
-      .then(data=>renderApps(data.apps))
-      .catch(()=>renderApps([]));
-
-    function renderApps(list){
-      appsContainer.innerHTML='';
-      if(!list.length){appsContainer.innerHTML='<div style="opacity:0.6">Нет доступных приложений</div>';return;}
-      list.forEach(app=>{
-        const card=document.createElement('div');card.className='card';
-        const secureBadge=app.secure==1?'<div style="font-size:12px;color:#4ff37f">secure</div>':'<div style="font-size:12px;color:#f37f7f">unverified</div>';
-        card.innerHTML=`
-          <div style="display:flex;flex-direction:column;align-items:center">
-            <div class="icon-wrap"><img src="${app.icon}" alt="${app.name}"></div>
-            <div class="title">${app.name}</div>
-            <div class="meta">${app.version}</div>
-            ${secureBadge}
-          </div>
-          <div class="actions">
-            <button class="btn btn-download" onclick="startConfirm('${app.package}','${app.apk}')">Скачать</button>
-            <button class="btn btn-info" onclick="showInfo('${app.name}','${app.package}')">Инфо</button>
-          </div>`;
-        appsContainer.appendChild(card);
+    // Загружаем список приложений
+    fetch("apps.json")
+      .then(r => r.json())
+      .then(data => {
+        let container = document.getElementById("apps");
+        data.apps.forEach(app => {
+          container.innerHTML += `
+            <div class="app">
+              <img src="${app.icon}" alt="${app.name}">
+              <div class="title">${app.name}</div>
+              <div>Версия: ${app.version}</div>
+              <button onclick="confirmDownload('${app.package}', '${app.apk}')">Скачать</button>
+            </div>
+          `;
+        });
       });
+
+    function confirmDownload(pkg, link) {
+      selectedApp = { pkg, link };
+      document.getElementById("terminal").style.display = "block";
+      document.getElementById("term-output").innerHTML = `Введите команду для подтверждения:<br>git clone ${pkg}`;
     }
 
-    // Terminal confirmation
-    let selected=null;const termBox=document.getElementById('terminal');const termOut=document.getElementById('term-output');const termInput=document.getElementById('term-input');const termOk=document.getElementById('term-ok');const termCancel=document.getElementById('term-cancel');
-    function startConfirm(pkg,apk){selected={pkg,apk};termOut.innerHTML='Введите команду для подтверждения:<br><span style="color:#9fffa1">git clone '+pkg+'</span>';termInput.value='';termBox.style.display='flex';termInput.focus();}
-    function closeTerm(){termBox.style.display='none';selected=null;}
-    termCancel.addEventListener('click',closeTerm);
-    termOk.addEventListener('click',()=>{if(!selected)return closeTerm();if(termInput.value.trim()==='git clone '+selected.pkg){termOut.innerHTML+='<br><br>✔ Команда верна. Начинается загрузка...';if(selected.apk==='#'){setTimeout(()=>{termOut.innerHTML+='<br>Скачивание завершено (DEMO).';},900);}else window.location.href=selected.apk;}else{termOut.innerHTML+='<br><br>❌ Неверная команда.';}});
-    termInput.addEventListener('keydown',e=>{if(e.key==='Enter'){termOk.click();}});
-    function showInfo(name,pkg){alert(name+'\n'+pkg);}
-    window.addEventListener('keydown',e=>{if(e.key==='Escape')closeTerm();});
-  </script></body>
-</html>  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius:16px;padding:14px;overflow:hidden;box-shadow:0 6px 22px rgba(3,10,18,0.6);
-  transition:transform .35s cubic-bezier(.2,.9,.3,1), box-shadow .35s;
-  min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
-}
-.card:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(2,8,20,0.7)}
-
-.icon-wrap{width:86px;height:86px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative}
-.icon-wrap img{width:86px;height:86px;object-fit:cover}
-
-.title{font-weight:600;font-size:16px;margin-bottom:6px}
-.meta{font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:10px}
-
-.actions{width:100%;display:flex;gap:8px}
-.btn{flex:1;padding:9px 10px;border-radius:10px;text-align:center;cursor:pointer;font-weight:600;border:none}
-.btn-download{background:linear-gradient(180deg,#1db954,#139746);color:#fff}
-.btn-info{background:rgba(255,255,255,0.04);color:#dfeef0}
-
-.card:before{content:'';position:absolute;left:-40%;top:-30%;width:200%;height:160%;background:linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.02) 100%);transform:translateX(-60%) rotate(8deg);opacity:0;transition:opacity .6s}
-.card:hover:before{opacity:1}
-
-#terminal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;width:420px;max-width:92vw;background:rgba(7,12,18,0.9);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.06);display:none;flex-direction:column;gap:8px}
-#term-output{background:#06070a;border-radius:8px;padding:10px;min-height:80px;color:#8fffa1;font-family:monospace;font-size:13px;overflow:auto}
-#term-input{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#e6ffe6;padding:10px;border-radius:8px;font-family:monospace}
-#term-actions{display:flex;gap:8px}
-.btn-cancel{background:#2b2b2b;color:#fff}
-
-@media (max-width:520px){h1{font-size:20px}.grid{gap:12px}}
-
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.logo .mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#6EE7B7,#3B82F6);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
-
-.matrix-glow{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
-
-  </style>
-</head>
-<body>
-  <canvas id="matrix"></canvas>
-  <div class="matrix-glow" aria-hidden></div>  <div class="wrap">
-    <div class="logo">
-      <div class="mark">gS</div>
-      <div>
-        <h1>gitStore</h1>
-        <div class="subtitle">Магазин приложений — клонируй, подтверждай и ставь</div>
-      </div>
-    </div><div class="grid" id="apps"></div>
-
-  </div>  <div id="terminal">
-    <div id="term-output">Введите команду для подтверждения:<br></div>
-    <input id="term-input" placeholder="git clone com.example.app">
-    <div id="term-actions">
-      <button class="btn btn-download" id="term-ok">Подтвердить</button>
-      <button class="btn btn-cancel" id="term-cancel">Отмена</button>
-    </div>
-  </div>  <script>
-    // Matrix background
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
-    let W = canvas.width = innerWidth;
-    let H = canvas.height = innerHeight;
-    const fontSize = Math.max(10, Math.floor(W / 80));
-    const cols = Math.floor(W / fontSize);
-    const drops = [];
-    for (let i = 0; i < cols; i++) drops[i] = Math.floor(Math.random() * H / fontSize);
-    const chars = (()=>{const a=[];const addRange=(f,t)=>{for(let i=f;i<=t;i++)a.push(String.fromCharCode(i));};addRange(0x30,0x39);addRange(0x41,0x5A);addRange(0x61,0x7A);addRange(0x0410,0x044F);['@','#','$','%','&','*','+','?','>','<','/'].forEach(s=>a.push(s));return a;})();
-    function drawMatrix(){ctx.fillStyle='rgba(1,2,3,0.14)';ctx.fillRect(0,0,W,H);ctx.font=`${fontSize}px monospace`;for(let i=0;i<cols;i++){const text=chars[Math.floor(Math.random()*chars.length)];const x=i*fontSize;const y=drops[i]*fontSize;if(Math.random()<0.01){ctx.fillStyle='rgba(255,255,255,'+(0.8+Math.random()*0.2)+')';}else{ctx.fillStyle='rgba(120,200,120,'+(0.2+Math.random()*0.6)+')';}ctx.fillText(text,x,y);if(y>H&&Math.random()>0.975)drops[i]=0;drops[i]++;}}let matInterval=setInterval(drawMatrix,45);window.addEventListener('resize',()=>{W=canvas.width=innerWidth;H=canvas.height=innerHeight;clearInterval(matInterval);const newCols=Math.floor(W/fontSize);drops.length=0;for(let i=0;i<newCols;i++)drops[i]=Math.floor(Math.random()*H/fontSize);matInterval=setInterval(drawMatrix,45);});(function glowLoop(){const g=document.querySelector('.matrix-glow');g.style.background='radial-gradient(circle at '+(Math.random()*100)+'% '+(Math.random()*100)+'%, rgba(255,255,255,0.08), transparent 12%)';setTimeout(glowLoop,500+Math.random()*1500);})();
-
-    // Load apps.json via JS fetch
-    const appsContainer=document.getElementById('apps');
-    fetch('apps.json')
-      .then(r=>r.json())
-      .then(data=>renderApps(data.apps))
-      .catch(()=>renderApps([]));
-
-    function renderApps(list){
-      appsContainer.innerHTML='';
-      if(!list.length){appsContainer.innerHTML='<div style="opacity:0.6">Нет доступных приложений</div>';return;}
-      list.forEach(app=>{
-        const card=document.createElement('div');card.className='card';
-        const secureBadge=app.secure==1?'<div style="font-size:12px;color:#4ff37f">secure</div>':'<div style="font-size:12px;color:#f37f7f">unverified</div>';
-        card.innerHTML=`
-          <div style="display:flex;flex-direction:column;align-items:center">
-            <div class="icon-wrap"><img src="${app.icon}" alt="${app.name}"></div>
-            <div class="title">${app.name}</div>
-            <div class="meta">${app.version}</div>
-            ${secureBadge}
-          </div>
-          <div class="actions">
-            <button class="btn btn-download" onclick="startConfirm('${app.package}','${app.apk}')">Скачать</button>
-            <button class="btn btn-info" onclick="showInfo('${app.name}','${app.package}')">Инфо</button>
-          </div>`;
-        appsContainer.appendChild(card);
-      });
-    }
-
-    // Terminal confirmation
-    let selected=null;const termBox=document.getElementById('terminal');const termOut=document.getElementById('term-output');const termInput=document.getElementById('term-input');const termOk=document.getElementById('term-ok');const termCancel=document.getElementById('term-cancel');
-    function startConfirm(pkg,apk){selected={pkg,apk};termOut.innerHTML='Введите команду для подтверждения:<br><span style="color:#9fffa1">git clone '+pkg+'</span>';termInput.value='';termBox.style.display='flex';termInput.focus();}
-    function closeTerm(){termBox.style.display='none';selected=null;}
-    termCancel.addEventListener('click',closeTerm);
-    termOk.addEventListener('click',()=>{if(!selected)return closeTerm();if(termInput.value.trim()==='git clone '+selected.pkg){termOut.innerHTML+='<br><br>✔ Команда верна. Начинается загрузка...';if(selected.apk==='#'){setTimeout(()=>{termOut.innerHTML+='<br>Скачивание завершено (DEMO).';},900);}else window.location.href=selected.apk;}else{termOut.innerHTML+='<br><br>❌ Неверная команда.';}});
-    termInput.addEventListener('keydown',e=>{if(e.key==='Enter'){termOk.click();}});
-    function showInfo(name,pkg){alert(name+'\n'+pkg);}
-    window.addEventListener('keydown',e=>{if(e.key==='Escape')closeTerm();});
-  </script></body>
-</html>  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius:16px;padding:14px;overflow:hidden;box-shadow:0 6px 22px rgba(3,10,18,0.6);
-  transition:transform .35s cubic-bezier(.2,.9,.3,1), box-shadow .35s;
-  min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
-}
-.card:hover{transform:translateY(-8px);box-shadow:0 16px 48px rgba(2,8,20,0.7)}
-
-.icon-wrap{width:86px;height:86px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative}
-.icon-wrap img{width:86px;height:86px;object-fit:cover}
-
-.title{font-weight:600;font-size:16px;margin-bottom:6px}
-.meta{font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:10px}
-
-.actions{width:100%;display:flex;gap:8px}
-.btn{flex:1;padding:9px 10px;border-radius:10px;text-align:center;cursor:pointer;font-weight:600;border:none}
-.btn-download{background:linear-gradient(180deg,#1db954,#139746);color:#fff}
-.btn-info{background:rgba(255,255,255,0.04);color:#dfeef0}
-
-/* Liquid shine (animated) */
-.card:before{content:'';position:absolute;left:-40%;top:-30%;width:200%;height:160%;background:linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.02) 100%);transform:translateX(-60%) rotate(8deg);opacity:0;transition:opacity .6s}
-.card:hover:before{opacity:1}
-
-/* Терминал подтверждения */
-#terminal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;width:420px;max-width:92vw;background:rgba(7,12,18,0.9);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,0.06);display:none;flex-direction:column;gap:8px}
-#term-output{background:#06070a;border-radius:8px;padding:10px;min-height:80px;color:#8fffa1;font-family:monospace;font-size:13px;overflow:auto}
-#term-input{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#e6ffe6;padding:10px;border-radius:8px;font-family:monospace}
-#term-actions{display:flex;gap:8px}
-.btn-cancel{background:#2b2b2b;color:#fff}
-
-/* Мелкие адаптивы */
-@media (max-width:520px){h1{font-size:20px}.grid{gap:12px}}
-
-/* Стили для фейкового фавикона/логотипа */
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.logo .mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#6EE7B7,#3B82F6);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
-
-/* subtle pulse for white symbols in matrix */
-.matrix-glow{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1}
-
-  </style>
-</head>
-<body>
-  <canvas id="matrix"></canvas>
-  <div class="matrix-glow" aria-hidden></div>  <div class="wrap">
-    <div class="logo">
-      <div class="mark">gS</div>
-      <div>
-        <h1>gitStore</h1>
-        <div class="subtitle">Магазин приложений — клонируй, подтверждай и ставь</div>
-      </div>
-    </div><div class="grid" id="apps"></div>
-
-  </div>  <!-- Терминал подтверждения -->  <div id="terminal">
-    <div id="term-output">Введите команду для подтверждения:<br></div>
-    <input id="term-input" placeholder="git clone com.example.app">
-    <div id="term-actions">
-      <button class="btn btn-download" id="term-ok">Подтвердить</button>
-      <button class="btn btn-cancel" id="term-cancel">Отмена</button>
-    </div>
-  </div>  <script>
-    /* --------- Matrix background --------- */
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
-    let W = canvas.width = innerWidth;
-    let H = canvas.height = innerHeight;
-
-    const fontSize = Math.max(10, Math.floor(W / 80));
-    const cols = Math.floor(W / fontSize);
-    const drops = [];
-    for (let i = 0; i < cols; i++) drops[i] = Math.floor(Math.random() * H / fontSize);
-
-    // символы: смешиваем кириллицу, латиницу, цифры и спецсимволы
-    const chars = (function(){
-      const a = [];
-      const addRange = (from,to) => { for(let i=from;i<=to;i++) a.push(String.fromCharCode(i)); };
-      addRange(0x30,0x39); // 0-9
-      addRange(0x41,0x5A); // A-Z
-      addRange(0x61,0x7A); // a-z
-      // кириллица
-      addRange(0x0410,0x044F);
-      // спец
-      const specials = ['@','#','$','%','&','*','+','?','>','<','/'];
-      specials.forEach(s=>a.push(s));
-      return a;
-    })();
-
-    function drawMatrix(){
-      ctx.fillStyle = 'rgba(1,2,3,0.14)';
-      ctx.fillRect(0,0,W,H);
-      ctx.font = `${fontSize}px monospace`;
-
-      for(let i=0;i<cols;i++){
-        const text = chars[Math.floor(Math.random()*chars.length)];
-        const x = i * fontSize;
-        const y = drops[i] * fontSize;
-
-        // иногда делаем яркий белый символ
-        if (Math.random() < 0.01) {
-          ctx.fillStyle = 'rgba(255,255,255,' + (0.8 + Math.random()*0.2) + ')';
+    document.getElementById("term-input").addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && selectedApp) {
+        if (this.value.trim() === `git clone ${selectedApp.pkg}`) {
+          window.location.href = selectedApp.link;
+          document.getElementById("term-output").innerHTML += `<br>✔ Клонирование ${selectedApp.pkg}...<br>Загрузка APK началась.`;
         } else {
-          ctx.fillStyle = 'rgba(120,200,120,' + (0.2 + Math.random()*0.6) + ')';
+          document.getElementById("term-output").innerHTML += `<br>❌ Ошибка: команда неверная.`;
         }
-        ctx.fillText(text, x, y);
-
-        if (y > H && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
-      }
-    }
-
-    let matInterval = setInterval(drawMatrix, 45);
-
-    window.addEventListener('resize', ()=>{
-      W = canvas.width = innerWidth; H = canvas.height = innerHeight;
-      clearInterval(matInterval);
-      // recalc
-      const newCols = Math.floor(W / fontSize);
-      drops.length = 0;
-      for (let i = 0; i < newCols; i++) drops[i] = Math.floor(Math.random()*H/fontSize);
-      matInterval = setInterval(drawMatrix, 45);
-    });
-
-    /* subtle white flashes overlay (glow) */
-    (function glowLoop(){
-      const g = document.querySelector('.matrix-glow');
-      g.style.background = 'radial-gradient(circle at '+(Math.random()*100)+'% '+(Math.random()*100)+'%, rgba(255,255,255,0.08), transparent 12%)';
-      setTimeout(glowLoop, 500 + Math.random()*1500);
-    })();
-
-    /* --------- Load apps.json (fallback sample) --------- */
-    const appsContainer = document.getElementById('apps');
-    const fallback = {
-      apps:[
-        {name:'gitBrowser', package:'com.gitstore.browser', version:'1.0', icon:'https://via.placeholder.com/80x80.png?text=G', apk:'#'},
-        {name:'gitGame', package:'com.gitstore.game', version:'1.2', icon:'https://via.placeholder.com/80x80.png?text=Game', apk:'#'}
-      ]
-    };
-
-    fetch('apps.json').then(r=>r.json()).then(data=>renderApps(data.apps)).catch(e=>renderApps(fallback.apps));
-
-    function renderApps(list){
-      appsContainer.innerHTML='';
-      list.forEach(app=>{
-        const card = document.createElement('div');card.className='card';
-        card.innerHTML = `
-          <div style="display:flex;flex-direction:column;align-items:center">
-            <div class="icon-wrap"><img src="${app.icon}" alt="${app.name}"></div>
-            <div class="title">${app.name}</div>
-            <div class="meta">${app.version}</div>
-          </div>
-          <div class="actions">
-            <button class="btn btn-download" onclick="startConfirm('${app.package.replace(/'/g,'\\\'')}', '${app.apk.replace(/'/g,'\\\'')}')">Скачать</button>
-            <button class="btn btn-info" onclick="showInfo('${app.name.replace(/'/g,'\\\'')}', '${app.package.replace(/'/g,'\\\'')}')">Инфо</button>
-          </div>
-        `;
-        appsContainer.appendChild(card);
-      });
-    }
-
-    /* --------- Terminal confirmation logic --------- */
-    let selected = null;
-    const termBox = document.getElementById('terminal');
-    const termOut = document.getElementById('term-output');
-    const termInput = document.getElementById('term-input');
-    const termOk = document.getElementById('term-ok');
-    const termCancel = document.getElementById('term-cancel');
-
-    function startConfirm(pkg, apk){
-      selected = {pkg, apk};
-      termOut.innerHTML = 'Введите команду для подтверждения:\n';
-      termOut.innerHTML += `<span style="color:#9fffa1">git clone ${pkg}</span>`;
-      termInput.value = '';
-      termBox.style.display = 'flex';
-      termInput.focus();
-    }
-
-    function closeTerm(){ termBox.style.display='none'; selected=null; }
-
-    termCancel.addEventListener('click', closeTerm);
-
-    termOk.addEventListener('click', ()=>{
-      if(!selected) return closeTerm();
-      if(termInput.value.trim() === `git clone ${selected.pkg}`){
-        termOut.innerHTML += '\n\n✔ Команда верна. Начинается загрузка...';
-        // если apk == '#', мы просто имитируем
-        if(selected.apk === '#'){ setTimeout(()=>{termOut.innerHTML += '\nСкачивание завершено (DEMO).';},900); }
-        else window.location.href = selected.apk;
-      } else {
-        termOut.innerHTML += '\n\n❌ Неверная команда.';
+        this.value = "";
       }
     });
-
-    termInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ termOk.click(); } });
-
-    function showInfo(name, pkg){ alert(name + '\n' + pkg); }
-
-    /* tiny accessibility: close terminal with ESC */
-    window.addEventListener('keydown', e=>{ if(e.key==='Escape') closeTerm(); });
-  </script></body>
+  </script>
+</body>
 </html>
