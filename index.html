@@ -2,64 +2,34 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>gitStore — Магазин приложений</title>
-  <style>
-    body { font-family: monospace; background: #111; color: #eee; }
-    .app { border: 1px solid #333; padding: 15px; margin: 10px; display: inline-block; width: 220px; text-align: center; background: #1e1e1e; border-radius: 10px; }
-    .app img { width: 80px; height: 80px; border-radius: 10px; }
-    .title { font-size: 16px; font-weight: bold; margin: 10px 0; }
-    button { background: #4CAF50; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; }
-    button:hover { background: #45a049; }
-    #terminal { display: none; background: black; color: lime; padding: 15px; margin: 20px auto; width: 500px; border-radius: 8px; font-family: monospace; }
-    input { background: black; color: lime; border: none; width: 100%; outline: none; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>gitStore</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>gitStore 🚀</h1>
-  <div id="apps"></div>
+  <header>
+    <h1>gitStore</h1>
+    <p>Магазин APK приложений на GitHub Pages 🚀</p>
+  </header>
 
-  <div id="terminal">
-    <div id="term-output">Введите команду для подтверждения:<br></div>
-    <input id="term-input" type="text" placeholder="git clone com.example.app">
-  </div>
+  <main class="grid">
+    <div class="card">
+      <img src="images/app1.png" alt="App 1">
+      <h2>App One</h2>
+      <p>Описание первого приложения.</p>
+      <a href="apps/app1.apk" class="btn">Скачать</a>
+    </div>
 
-  <script>
-    let selectedApp = null;
+    <div class="card">
+      <img src="images/app2.png" alt="App 2">
+      <h2>App Two</h2>
+      <p>Описание второго приложения.</p>
+      <a href="apps/app2.apk" class="btn">Скачать</a>
+    </div>
+  </main>
 
-    // Загружаем список приложений
-    fetch("apps.json")
-      .then(r => r.json())
-      .then(data => {
-        let container = document.getElementById("apps");
-        data.apps.forEach(app => {
-          container.innerHTML += `
-            <div class="app">
-              <img src="${app.icon}" alt="${app.name}">
-              <div class="title">${app.name}</div>
-              <div>Версия: ${app.version}</div>
-              <button onclick="confirmDownload('${app.package}', '${app.apk}')">Скачать</button>
-            </div>
-          `;
-        });
-      });
-
-    function confirmDownload(pkg, link) {
-      selectedApp = { pkg, link };
-      document.getElementById("terminal").style.display = "block";
-      document.getElementById("term-output").innerHTML = `Введите команду для подтверждения:<br>git clone ${pkg}`;
-    }
-
-    document.getElementById("term-input").addEventListener("keydown", function(e) {
-      if (e.key === "Enter" && selectedApp) {
-        if (this.value.trim() === `git clone ${selectedApp.pkg}`) {
-          window.location.href = selectedApp.link;
-          document.getElementById("term-output").innerHTML += `<br>✔ Клонирование ${selectedApp.pkg}...<br>Загрузка APK началась.`;
-        } else {
-          document.getElementById("term-output").innerHTML += `<br>❌ Ошибка: команда неверная.`;
-        }
-        this.value = "";
-      }
-    });
-  </script>
+  <footer>
+    <p>© 2025 gitStore</p>
+  </footer>
 </body>
 </html>
