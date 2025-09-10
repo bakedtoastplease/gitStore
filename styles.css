@@ -1,234 +1,96 @@
-/* Базовый стиль */
-body, html {
+/* Основные стили */
+body {
+  font-family: Arial, sans-serif;
   margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', monospace;
-  background: #000;
+  background: #0d1117;
   color: #fff;
-  overflow-x: hidden;
-}
-
-/* Фон */
-#matrix {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: #000;
-  z-index: -1;
+  text-align: center;
 }
 
 /* Шапка */
 header {
-  position: sticky;
-  top: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px);
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 10;
+  background: #161b22;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,.5);
 }
 
 header h1 {
   margin: 0;
-  font-size: clamp(20px, 3vw, 28px);
-  letter-spacing: 2px;
+  font-size: 2rem;
+  color: #58a6ff;
 }
 
-/* Категории */
-nav {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 10px;
+header p {
+  margin: 5px 0 0;
+  font-size: 1rem;
+  color: #8b949e;
 }
 
-nav button {
-  border: none;
-  background: rgba(255,255,255,0.1);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-nav button:hover,
-nav button.active {
-  background: rgba(255,255,255,0.3);
-}
-
-/* Список приложений */
-#app-list {
+/* Сетка карточек */
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   padding: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-.app-card {
-  background: rgba(255,255,255,0.05);
+/* Карточка */
+.card {
+  background: #21262d;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.6);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,.8);
+}
+
+.card img {
+  width: 90px;
+  height: 90px;
   border-radius: 20px;
-  backdrop-filter: blur(15px);
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: 0.3s;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-}
-
-.app-card:hover {
-  transform: translateY(-5px);
-  background: rgba(255,255,255,0.15);
-}
-
-.app-card img {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
   margin-bottom: 10px;
 }
 
-.app-card h3 {
-  font-size: 16px;
-  margin: 5px 0;
-  text-align: center;
+/* Заголовок и описание */
+.card h2 {
+  margin: 10px 0 5px;
+  font-size: 1.3rem;
+  color: #fff;
 }
 
-.app-card small {
-  opacity: 0.7;
-  font-size: 12px;
+.card p {
+  font-size: 0.95rem;
+  color: #8b949e;
+  margin-bottom: 15px;
 }
 
-/* Терминал */
-#terminal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.95);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.hidden { display: none; }
-
-.terminal-content {
-  width: 90%;
-  max-width: 600px;
-  background: black;
-  border: 2px solid #0f0;
-  padding: 20px;
-  color: #0f0;
-  font-size: 14px;
-  border-radius: 12px;
-}
-
-#terminal-input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 10px;
-  border: none;
-  outline: none;
-  background: black;
-  color: #0f0;
-  font-family: monospace;
-  }
-/* Категории */
-nav {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-nav button {
-  border: none;
-  background: rgba(255,255,255,0.1);
+/* Кнопка */
+.btn {
+  display: inline-block;
+  padding: 10px 15px;
+  background: #238636;
   color: white;
-  padding: 6px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: 0.3s;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.3s;
+  font-weight: bold;
 }
 
-nav button:hover {
-  background: rgba(255,255,255,0.3);
+.btn:hover {
+  background: #2ea043;
 }
 
-/* Список приложений */
-#app-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 15px;
-  padding: 20px;
-}
-
-.app-card {
-  background: rgba(255,255,255,0.05);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
+/* Подвал */
+footer {
+  background: #161b22;
   padding: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: 0.3s;
-}
-
-.app-card:hover {
-  transform: translateY(-5px);
-  background: rgba(255,255,255,0.15);
-}
-
-.app-card img {
-  width: 80px;
-  height: 80px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-}
-
-.app-card h3 {
-  font-size: 14px;
-  margin: 5px 0;
-}
-
-.app-card small {
-  opacity: 0.7;
-}
-
-/* Терминал */
-#terminal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.hidden { display: none; }
-
-.terminal-content {
-  width: 90%;
-  max-width: 600px;
-  background: black;
-  border: 2px solid #0f0;
-  padding: 20px;
-  color: #0f0;
-  font-size: 14px;
-}
-
-#terminal-input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 10px;
-  border: none;
-  outline: none;
-  background: black;
-  color: #0f0;
-  font-family: monospace;
+  font-size: 0.9rem;
+  color: #8b949e;
+  margin-top: 20px;
 }
