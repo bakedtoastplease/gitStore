@@ -1,9 +1,9 @@
 [
   {
-    "name": "App One",
-    "desc": "Описание первого приложения.",
-    "icon": "images/app1.png",
-    "file": "apps/app1.apk"
+    "name": "Google Play",
+    "desc": "Оффициальный магазин Google.",
+    "icon": "images/playmarket.webp",
+    "file": "apps/playmarket.apk"
   },
   {
     "name": "App Two (без иконки)",
@@ -14,6 +14,18 @@
   {
     "name": "App Three (недоступно)",
     "desc": "APK нет, кнопка станет серой.",
+    "icon": "images/app3.png",
+    "file": ""
+  },
+  {
+    "name": "App Three (недоступно)",
+    "desc": "APK нет, кнопка станет серой.",
+    "icon": "images/app3.png",
+    "file": ""
+  },
+  {
+    "name": "App Three (недоступно)",
+    "desc": "asdsdasd",
     "icon": "images/app3.png",
     "file": ""
   }
