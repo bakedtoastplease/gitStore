@@ -3,6 +3,14 @@
     "name": "Google Play",
     "desc": "Оффициальный магазин Google.",
     "icon": "images/playmarket.webp",
-    "file": ""
+    "file": "apps/playmarket.apk",
+    "category": "tools"
+  },
+  {
+    "name": "Cool Game",
+    "desc": "Аркадная игра для всех.",
+    "icon": "images/game.png",
+    "file": "apps/game.apk",
+    "category": "games"
   }
 ]
