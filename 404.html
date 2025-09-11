@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 — Not Found</title>
   <style>
-    /* Фон */
+    /* Основной фон */
     body {
       margin: 0;
       padding: 0;
@@ -15,24 +15,25 @@
       justify-content: center;
       align-items: center;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(-45deg, #FF7373, #A60000);
-      background-size: 400% 400%;
-      animation: gradientMove 15s ease infinite;
+      background: #000;
       color: #00ff88;
       text-align: center;
       overflow: hidden;
     }
 
-    /* Анимация фона */
-    @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    /* Холст для "Матрицы" */
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
     }
 
     /* Заголовок */
     h1 {
-      font-size: 5em;
+      font-size: 6em;
       margin: 0 0 20px;
       text-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88;
       animation: flicker 2s infinite;
@@ -40,15 +41,11 @@
 
     /* Эффект мерцания */
     @keyframes flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        opacity: 1;
-      }
-      20%, 22%, 24%, 55% {
-        opacity: 0.6;
-      }
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+      20%, 22%, 24%, 55% { opacity: 0.6; }
     }
 
-    /* Текст */
+    /* Подпись */
     p {
       font-size: 1.5em;
       margin-bottom: 30px;
@@ -75,36 +72,51 @@
       box-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88;
       transform: scale(1.05);
     }
-
-    /* Фоновые нули и единицы */
-    .matrix {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      font-family: monospace;
-      font-size: 14px;
-      color: rgba(0, 255, 0, 0.15);
-      overflow: hidden;
-      z-index: -1;
-      white-space: pre;
-      animation: matrixScroll 15s linear infinite;
-    }
-
-    @keyframes matrixScroll {
-      from { transform: translateY(-100%); }
-      to { transform: translateY(100%); }
-    }
   </style>
 </head>
 <body>
-  <div class="matrix">
-why are you there?
-  </div>
+  <canvas id="matrix"></canvas>
 
   <h1>404 🚫</h1>
   <p>Oops! Page not found. ;(</p>
   <a href="/gitStore">⬅ Go back!</a>
+
+  <script>
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&@";
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function draw() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#00ff88";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(draw, 50);
+
+    window.addEventListener("resize", () => {
+      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+    });
+  </script>
 </body>
 </html>
