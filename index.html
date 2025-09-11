@@ -5,41 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>gitStore</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="images/logo.svg">
 </head>
 <body>
   <canvas id="matrix"></canvas>
 
   <header>
-    <link rel="icon" type="image/svg+xml" href="images/logo.svg">
     <h1>gitStore</h1>
     <p>Download APK - gitStore! 🚀</p>
-
-    <!-- Категории подгружаются динамически -->
     <div class="categories" id="categories"></div>
   </header>
 
   <main class="grid" id="appGrid">
-    <!-- Приложения пока оставим вручную, потом можно вынести в apps.json -->
-    <div class="card" data-category="games">
-      <img src="images/app1.png" alt="App 1" onerror="this.src='images/404.png'">
-      <h2>App One</h2>
-      <p>Описание первого приложения (игра).</p>
-      <a href="apps/app1.apk" class="btn">Скачать</a>
-    </div>
-
-    <div class="card" data-category="tools">
-      <img src="images/app2.png" alt="App 2" onerror="this.src='images/404.png'">
-      <h2>App Two</h2>
-      <p>Утилита для системы.</p>
-      <a href="apps/app2.apk" class="btn">Скачать</a>
-    </div>
-
-    <div class="card" data-category="social">
-      <img src="images/app3.png" alt="App 3" onerror="this.src='images/404.png'">
-      <h2>App Three</h2>
-      <p>Социальное приложение.</p>
-      <a href="#" class="btn disabled">Недоступно</a>
-    </div>
+    <!-- Приложения будут подгружаться из apps.json -->
   </main>
 
   <footer>
